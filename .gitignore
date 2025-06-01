@@ -1,0 +1,14 @@
+# Python / IDE
+venv/
+__pycache__/
+*.pyc
+.idea/
+
+# AWS creds & keys
+*.pem
+.env
+
+# Terraform local state & secrets
+infra/.terraform/
+infra/terraform.tfstate*
+infra/terraform.tfvars
