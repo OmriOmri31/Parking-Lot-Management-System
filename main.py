@@ -56,5 +56,40 @@ def add_entry():
     return jsonify({"id": new_id}), 201
 
 
+
+
+
+@app.route("/exit", methods=["POST"])
+def exit_lot():
+    car_id = request.args.get("ticketId", type=int)
+    if car_id is None:
+        abort(400, "Car id is required")
+
+    cur.execute("SELECT NOW();")
+    current_time = cur.fetchone()[0]
+    cur.execute("SELECT time_of_creation FROM cars WHERE car_id = %s", (car_id,))
+    entry_time = cur.fetchone()[0]
+
+    total_time = (current_time - entry_time).total_seconds()
+
+    cur.execute("SELECT licence_plate, parking_lot FROM cars WHERE car_id = %s", (car_id,))
+    row = cur.fetchone()
+    if row is None:
+        abort(404, "ticket not found")
+    plate, lot = row
+    hours = (int) (total_time//3600)
+    minutes = (int) ((total_time%3600)//60)
+    seconds = total_time % 60
+    total_time = f"{hours}h, {minutes}m and {seconds}s"
+
+    charge = 10 * hours + 2.5 * (minutes // 15)
+
+    return jsonify({"Licence Plate": plate,
+                    "Total Time": total_time,
+                    "Parking Lot Number": lot,
+                    "charge" : f"{charge}$"}), 201
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
